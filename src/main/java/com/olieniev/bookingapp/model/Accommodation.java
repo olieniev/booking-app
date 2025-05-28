@@ -55,6 +55,9 @@ public class Accommodation {
     @Column(nullable = false)
     private Integer availability;
 
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
     public enum Type {
         HOTEL,
         HOUSE,
