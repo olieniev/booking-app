@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: org.example
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  value: admin@email.com
+              - column:
+                  name: first_name
+                  value: admin
+              - column:
+                  name: last_name
+                  value: adminovich
+              - column:
+                  name: password
+                  value: $2a$10$iomnD9WmXZ21MXGMAc9dFeR1ixhlMFOh7zGQJyUAgSuL5fkxH0F6.
+              - column:
+                  name: role
+                  value: ROLE_ADMIN
+              - column:
+                  name: is_deleted
+                  valueBoolean: false
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  value: user@email.com
+              - column:
+                  name: first_name
+                  value: user
+              - column:
+                  name: last_name
+                  value: userovich
+              - column:
+                  name: password
+                  value: $2a$10$iomnD9WmXZ21MXGMAc9dFeR1ixhlMFOh7zGQJyUAgSuL5fkxH0F6.
+              - column:
+                  name: role
+                  value: ROLE_USER
+              - column:
+                  name: is_deleted
+                  valueBoolean: false

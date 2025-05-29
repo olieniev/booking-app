@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/changes/02-create-accommodations-amenities-table.yaml
   - include:
       file: db/changelog/changes/03-create-users-table.yaml
+  - include:
+      file: db/changelog/changes/04-insert-users-into-table.yaml
