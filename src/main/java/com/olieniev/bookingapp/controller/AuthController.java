@@ -1,8 +1,12 @@
 package com.olieniev.bookingapp.controller;
 
+import com.olieniev.bookingapp.dto.user.CreateUserRequestDto;
+import com.olieniev.bookingapp.dto.user.UserDto;
 import com.olieniev.bookingapp.dto.user.UserLoginRequestDto;
 import com.olieniev.bookingapp.dto.user.UserLoginResponseDto;
+import com.olieniev.bookingapp.exception.RegistrationException;
 import com.olieniev.bookingapp.security.AuthenticationService;
+import com.olieniev.bookingapp.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
         description = "All methods of authentication controller")
 public class AuthController {
     private final AuthenticationService authenticationService;
+    private final UserService userService;
 
     @Operation(summary = "Authenticate(login) method",
             description = "Returns JWT token")
@@ -30,7 +35,8 @@ public class AuthController {
     @Operation(summary = "Registration method",
             description = "Returns registered user")
     @PostMapping("/register")
-    public UserLoginResponseDto register(/*TODO*/) {
-        return null;
+    public UserDto register(@RequestBody @Valid CreateUserRequestDto requestDto)
+            throws RegistrationException {
+        return userService.register(requestDto);
     }
 }
