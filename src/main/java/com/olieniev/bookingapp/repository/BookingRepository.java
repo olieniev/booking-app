@@ -1,6 +1,7 @@
 package com.olieniev.bookingapp.repository;
 
 import com.olieniev.bookingapp.model.Booking;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,5 +20,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Page<Booking> findByStatus(Booking.Status status, Pageable pageable);
 
-    Optional<Booking> findByUserIdAndAccommodationId(Long userId, Long accommodationId);
+    List<Booking> findByUserIdAndAccommodationId(Long userId, Long accommodationId);
 }

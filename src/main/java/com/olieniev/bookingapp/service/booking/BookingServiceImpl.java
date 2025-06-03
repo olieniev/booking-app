@@ -15,7 +15,7 @@ import com.olieniev.bookingapp.model.User;
 import com.olieniev.bookingapp.repository.AccommodationRepository;
 import com.olieniev.bookingapp.repository.BookingRepository;
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,18 +41,19 @@ public class BookingServiceImpl implements BookingService {
         if (accommodation.getAvailability() == 0) {
             throw new UnavailableAccommodationException("Requested accommodation is unavailable!");
         }
-        Optional<Booking> existingBooking = bookingRepository
+        List<Booking> existingBookings = bookingRepository
                 .findByUserIdAndAccommodationId(user.getId(), requestDto.accommodationId());
-        if (existingBooking.isPresent()
-                && (isDateOverlap(
+        for (Booking booking : existingBookings) {
+            if (isBookingActive(booking) && isDateOverlap(
                     requestDto.checkInDate(),
                     requestDto.checkOutDate(),
-                    existingBooking.get().getCheckInDate(),
-                    existingBooking.get().getCheckOutDate()))) {
-            throw new BookingAccessDeniedException(
-                "You already have a booking for these dates. Please refer to booking id: "
-                    + existingBooking.get().getId()
-            );
+                    booking.getCheckInDate(),
+                    booking.getCheckOutDate())) {
+                throw new BookingAccessDeniedException(
+                    "You already have a booking for these dates. Please refer to booking id: "
+                        + booking.getId()
+                );
+            }
         }
         Booking booking = bookingMapper.toModel(requestDto);
         booking.setUser(user);
@@ -143,7 +144,7 @@ public class BookingServiceImpl implements BookingService {
         };
     }
 
-    private boolean isDateLegit(
+    private void isDateLegit(
             LocalDate start1, LocalDate end1) {
         if (end1.isBefore(start1)) {
             throw new IllegalArgumentException("Booking start date cannot be after end date!");
@@ -151,7 +152,6 @@ public class BookingServiceImpl implements BookingService {
         if (start1.isEqual(end1)) {
             throw new IllegalArgumentException("Minimum booking duration is one night!");
         }
-        return true;
     }
 
     private boolean isDateOverlap(
@@ -159,4 +159,12 @@ public class BookingServiceImpl implements BookingService {
         return (start1.isBefore(end2) && start2.isBefore(end1));
     }
 
+    private boolean isBookingActive(Booking booking) {
+        return booking.getStatus() == Booking.Status.PENDING
+            || booking.getStatus() == Booking.Status.CONFIRMED;
+    }
+
+    private void modifyAvailabilityIfNeeded(Booking booking) {
+
+    }
 }
