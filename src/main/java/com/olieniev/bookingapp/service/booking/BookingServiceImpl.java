@@ -14,6 +14,8 @@ import com.olieniev.bookingapp.model.Role;
 import com.olieniev.bookingapp.model.User;
 import com.olieniev.bookingapp.repository.AccommodationRepository;
 import com.olieniev.bookingapp.repository.BookingRepository;
+import java.time.LocalDate;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +32,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto save(User user, CreateBookingRequestDto requestDto) {
+        isDateLegit(requestDto.checkInDate(), requestDto.checkOutDate());
         Accommodation accommodation = accommodationRepository
                 .findById(requestDto.accommodationId())
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -37,6 +40,19 @@ public class BookingServiceImpl implements BookingService {
             ));
         if (accommodation.getAvailability() == 0) {
             throw new UnavailableAccommodationException("Requested accommodation is unavailable!");
+        }
+        Optional<Booking> existingBooking = bookingRepository
+                .findByUserIdAndAccommodationId(user.getId(), requestDto.accommodationId());
+        if (existingBooking.isPresent()
+                && (isDateOverlap(
+                    requestDto.checkInDate(),
+                    requestDto.checkOutDate(),
+                    existingBooking.get().getCheckInDate(),
+                    existingBooking.get().getCheckOutDate()))) {
+            throw new BookingAccessDeniedException(
+                "You already have a booking for these dates. Please refer to booking id: "
+                    + existingBooking.get().getId()
+            );
         }
         Booking booking = bookingMapper.toModel(requestDto);
         booking.setUser(user);
@@ -83,6 +99,11 @@ public class BookingServiceImpl implements BookingService {
             );
         }
         Booking booking = getBookingIfAccessible(user, bookingId);
+        if (requestDto.status() == booking.getStatus()) {
+            throw new BookingAccessDeniedException(
+                "Booking already has a status: " + booking.getStatus()
+            );
+        }
         booking.setStatus(requestDto.status());
         return bookingMapper.toDto(bookingRepository.save(booking));
     }
@@ -121,4 +142,21 @@ public class BookingServiceImpl implements BookingService {
                 ));
         };
     }
+
+    private boolean isDateLegit(
+            LocalDate start1, LocalDate end1) {
+        if (end1.isBefore(start1)) {
+            throw new IllegalArgumentException("Booking start date cannot be after end date!");
+        }
+        if (start1.isEqual(end1)) {
+            throw new IllegalArgumentException("Minimum booking duration is one night!");
+        }
+        return true;
+    }
+
+    private boolean isDateOverlap(
+            LocalDate start1, LocalDate end1, LocalDate start2, LocalDate end2) {
+        return (start1.isBefore(end2) && start2.isBefore(end1));
+    }
+
 }

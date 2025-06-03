@@ -30,7 +30,7 @@ public class UserController {
     @PutMapping("/{id}/role")
     @Operation(summary = "Update user role method",
             description = "Updates user role by given id and provided role")
-    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER','USER')")
     public UpdateRoleResponseDto updateUserRole(
             Authentication authentication,
             @PathVariable Long id,
@@ -49,6 +49,7 @@ public class UserController {
     @PatchMapping("/me")
     @Operation(summary = "Update user info method",
             description = "Returns user info of authenticated user")
+    @PreAuthorize("hasAnyRole('MANAGER','USER')")
     public UserDto updateUser(Authentication authentication,
                               @RequestBody UpdateUserRequestDto requestDto) {
         return userService.updateUser((User) authentication.getPrincipal(), requestDto);
