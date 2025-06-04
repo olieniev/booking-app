@@ -10,6 +10,7 @@ import com.olieniev.bookingapp.model.Accommodation;
 import com.olieniev.bookingapp.model.Role;
 import com.olieniev.bookingapp.model.User;
 import com.olieniev.bookingapp.repository.AccommodationRepository;
+import com.olieniev.bookingapp.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,12 +23,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class AccommodationServiceImpl implements AccommodationService {
     private final AccommodationRepository accommodationRepository;
     private final AccommodationMapper accommodationMapper;
+    private final NotificationService notificationService;
 
     @Override
     public AccommodationDto save(User user, CreateAccommodationRequestDto requestDto) {
         Accommodation accommodation = accommodationMapper.toModel(requestDto);
         accommodation.setOwner(user);
-        return accommodationMapper.toDto(accommodationRepository.save(accommodation));
+        AccommodationDto dto = accommodationMapper.toDto(
+                accommodationRepository.save(accommodation)
+        );
+        notificationService.notify(createNotification(dto));
+        return dto;
     }
 
     @Override
@@ -53,7 +59,11 @@ public class AccommodationServiceImpl implements AccommodationService {
             throw new OwnerNotAuthorisedException("Not authorised to update the accommodation!");
         }
         accommodationMapper.updateAccommodationFromDto(requestDto, accommodation);
-        return accommodationMapper.toDto(accommodationRepository.save(accommodation));
+        AccommodationDto dto = accommodationMapper.toDto(
+                accommodationRepository.save(accommodation)
+        );
+        notificationService.notify(updateNotification(id, user, dto));
+        return dto;
     }
 
     @Override
@@ -69,5 +79,21 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     private boolean isOwner(User user, Accommodation accommodation) {
         return accommodation.getOwner().equals(user);
+    }
+
+    private String createNotification(AccommodationDto dto) {
+        return """
+            New accommodation has been added! 📩
+            Please, see accommodation details below:
+            %s
+            """.formatted(dto);
+    }
+
+    private String updateNotification(Long id, User user, AccommodationDto dto) {
+        return """
+            Existing booking with id %d has been updated by a user with id %d and a role - %s!✏️
+            New details:
+            %s
+            """.formatted(id, user.getId(), user.getRole(), dto);
     }
 }

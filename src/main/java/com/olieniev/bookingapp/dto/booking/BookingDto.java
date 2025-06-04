@@ -16,4 +16,22 @@ public record BookingDto(
         @NotNull
         Booking.Status status
 ) {
+    @Override
+    public String toString() {
+        return """
+            Booking id: %d
+            Check-in date: %s
+            Check-out date: %s
+            User id: %d
+            Accommodation id: %d
+            Current status: %s
+            """.formatted(
+                    id,
+                    checkInDate,
+                    checkOutDate,
+                    userId,
+                    accommodationId,
+                    status
+                );
+    }
 }

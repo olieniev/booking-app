@@ -45,6 +45,7 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private Status status = Status.PENDING;
     @Column(nullable = false)
+    @ToString.Exclude
     private boolean isDeleted = false;
 
     public enum Status {

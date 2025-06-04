@@ -14,6 +14,7 @@ import com.olieniev.bookingapp.model.Role;
 import com.olieniev.bookingapp.model.User;
 import com.olieniev.bookingapp.repository.AccommodationRepository;
 import com.olieniev.bookingapp.repository.BookingRepository;
+import com.olieniev.bookingapp.service.notification.NotificationService;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingMapper bookingMapper;
     private final BookingRepository bookingRepository;
     private final AccommodationRepository accommodationRepository;
+    private final NotificationService notificationService;
 
     @Override
     public BookingDto save(User user, CreateBookingRequestDto requestDto) {
@@ -58,7 +60,9 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingMapper.toModel(requestDto);
         booking.setUser(user);
         booking.setAccommodation(accommodation);
-        return bookingMapper.toDto(bookingRepository.save(booking));
+        BookingDto dto = bookingMapper.toDto(bookingRepository.save(booking));
+        notificationService.notify(createNotification(dto));
+        return dto;
     }
 
     @Override
@@ -105,8 +109,13 @@ public class BookingServiceImpl implements BookingService {
                 "Booking already has a status: " + booking.getStatus()
             );
         }
+        Booking.Status oldStatus = booking.getStatus();
         booking.setStatus(requestDto.status());
-        return bookingMapper.toDto(bookingRepository.save(booking));
+        booking = bookingRepository.save(booking);
+        notificationService.notify(updateNotification(
+                bookingId,user, oldStatus, requestDto.status()
+        ));
+        return bookingMapper.toDto(booking);
     }
 
     @Override
@@ -164,7 +173,23 @@ public class BookingServiceImpl implements BookingService {
             || booking.getStatus() == Booking.Status.CONFIRMED;
     }
 
-    private void modifyAvailabilityIfNeeded(Booking booking) {
+    private String createNotification(BookingDto dto) {
+        return """
+            New booking has been created! 🗓️
+            Please, see booking details below:
+            %s
+            """.formatted(dto);
+    }
 
+    private String updateNotification(
+            Long id,
+            User user,
+            Booking.Status oldStatus,
+            Booking.Status newStatus) {
+        return """
+            Booking with id %d has been updated by a user with id %d and a role - %s! ✏️
+            Old status: %s
+            New status: %s
+            """.formatted(id, user.getId(), user.getRole(), oldStatus, newStatus);
     }
 }

@@ -49,6 +49,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean isDeleted = false;
     @OneToMany(mappedBy = "owner")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Accommodation> accommodations = new HashSet<>();
 
     @Override
