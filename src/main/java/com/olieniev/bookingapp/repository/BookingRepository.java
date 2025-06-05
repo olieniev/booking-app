@@ -1,6 +1,7 @@
 package com.olieniev.bookingapp.repository;
 
 import com.olieniev.bookingapp.model.Booking;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -21,4 +22,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Page<Booking> findByStatus(Booking.Status status, Pageable pageable);
 
     List<Booking> findByUserIdAndAccommodationId(Long userId, Long accommodationId);
+
+    @EntityGraph(attributePaths = {"accommodation"})
+    List<Booking> findAllByStatusInAndCheckOutDateLessThanEqual(
+            List<Booking.Status> statusesForExpiration, LocalDate tomorrow
+    );
 }

@@ -97,13 +97,14 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto updateByBookingId(
             User user, Long bookingId, UpdateBookingRequestDto requestDto
     ) {
+        Booking booking = getBookingIfAccessible(user, bookingId);
         if (user.getRole() == Role.ROLE_USER
-                && (!requestDto.status().equals(Booking.Status.CANCELED))) {
+                && (!(booking.getStatus() == Booking.Status.PENDING
+                    && requestDto.status() == Booking.Status.CANCELED))) {
             throw new BookingAccessDeniedException(
                 "You are not authorized to change the status to " + requestDto.status()
             );
         }
-        Booking booking = getBookingIfAccessible(user, bookingId);
         if (requestDto.status() == booking.getStatus()) {
             throw new BookingAccessDeniedException(
                 "Booking already has a status: " + booking.getStatus()
@@ -112,6 +113,7 @@ public class BookingServiceImpl implements BookingService {
         Booking.Status oldStatus = booking.getStatus();
         booking.setStatus(requestDto.status());
         booking = bookingRepository.save(booking);
+        changeAvailability(oldStatus, requestDto.status(), booking.getAccommodation());
         notificationService.notify(updateNotification(
                 bookingId,user, oldStatus, requestDto.status()
         ));
@@ -191,5 +193,18 @@ public class BookingServiceImpl implements BookingService {
             Old status: %s
             New status: %s
             """.formatted(id, user.getId(), user.getRole(), oldStatus, newStatus);
+    }
+
+    private void changeAvailability(
+            Booking.Status oldStatus, Booking.Status newStatus, Accommodation accommodation
+    ) {
+        if (oldStatus == Booking.Status.PENDING && newStatus == Booking.Status.CONFIRMED) {
+            accommodation.setAvailability(accommodation.getAvailability() - 1);
+        }
+        if (oldStatus == Booking.Status.CONFIRMED
+                && (newStatus == Booking.Status.CANCELED || newStatus == Booking.Status.EXPIRED)) {
+            accommodation.setAvailability(accommodation.getAvailability() + 1);
+        }
+        accommodationRepository.save(accommodation);
     }
 }
