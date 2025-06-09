@@ -58,7 +58,6 @@ public class PaymentController {
                 .replacePath(null)
                 .build()
                 .toUriString();
-        System.out.println(baseUrl);
         return paymentService.createPayment(
             requestDto,
             (User) authentication.getPrincipal(),
@@ -70,11 +69,10 @@ public class PaymentController {
     @PreAuthorize("hasAnyRole('MANAGER','USER')")
     @Operation(summary = "Successful payment method",
             description = "Handles successful payment processing through Stripe redirection")
-    public ResponseEntity<Map<String, String>> paymentSuccess() {
-        return ResponseEntity.ok(Map.of(
-            "status", "success",
-            "message", "Payment is successful."
-        ));
+    public ResponseEntity<Map<String, String>> paymentSuccess(
+            @RequestParam("session_id") String sessionId
+    ) {
+        return paymentService.handleSuccess(sessionId);
     }
 
     @GetMapping("/cancel")

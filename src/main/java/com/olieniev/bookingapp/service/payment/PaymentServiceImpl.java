@@ -12,16 +12,19 @@ import com.olieniev.bookingapp.model.Role;
 import com.olieniev.bookingapp.model.User;
 import com.olieniev.bookingapp.repository.BookingRepository;
 import com.olieniev.bookingapp.repository.PaymentRepository;
+import com.olieniev.bookingapp.service.notification.NotificationService;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,12 +32,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class PaymentServiceImpl implements PaymentService {
+    private static final String PAYMENTS_URL = "/payments";
     private static final String SUCCESS_URL = "/success";
     private static final String CANCEL_URL = "/cancel";
     private static final String TOTAL_STRING = "Total amount";
+    private static final String PAID_STATUS = "paid";
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
     private final BookingRepository bookingRepository;
+    private final NotificationService notificationService;
     @Value("${stripe.api.token}")
     private String stripeApiKey;
 
@@ -76,8 +82,9 @@ public class PaymentServiceImpl implements PaymentService {
         long amountInCents = total.multiply(BigDecimal.valueOf(100)).longValueExact();
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl(baseUrl + SUCCESS_URL)
-                .setCancelUrl(baseUrl + CANCEL_URL)
+                .setSuccessUrl(baseUrl + PAYMENTS_URL + SUCCESS_URL
+                        + "?session_id={CHECKOUT_SESSION_ID}")
+                .setCancelUrl(baseUrl + PAYMENTS_URL + CANCEL_URL)
                 .addLineItem(
                     SessionCreateParams.LineItem.builder()
                         .setQuantity(1L)
@@ -105,6 +112,38 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setUrl(session.getUrl());
         paymentRepository.save(payment);
         return new CreatePaymentResponseDto(session.getUrl(), session.getId());
+    }
+
+    @Override
+    public ResponseEntity<Map<String, String>> handleSuccess(String sessionId) {
+        Stripe.apiKey = stripeApiKey;
+        Session session;
+        Payment payment;
+        try {
+            session = Session.retrieve(sessionId);
+        } catch (StripeException e) {
+            throw new StripeSessionException("Error occurred while retrieving session info.");
+        }
+        if (session.getPaymentStatus().equals(PAID_STATUS)) {
+            payment = paymentRepository.findBySessionId(session.getId()).orElseThrow(
+                    () -> new StripeSessionException("Couldn't find payment by id: "
+                            + session.getId())
+            );
+            payment.setStatus(Payment.Status.PAID);
+            paymentRepository.save(payment);
+            notificationService.notify(createNotification(payment));
+        }
+        return ResponseEntity.ok(Map.of(
+            "status", "success",
+            "message", "Payment is successful."));
+    }
+
+    private String createNotification(Payment payment) {
+        return """
+            Successful payment!💳
+            See payment details:
+            %s
+            """.formatted(paymentMapper.toDto(payment));
     }
 
     private BigDecimal countAmountToPay(Booking booking) {
