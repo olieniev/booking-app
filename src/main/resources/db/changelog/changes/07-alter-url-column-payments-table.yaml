@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 6
+      author: com.olieniev
+      changes:
+        - modifyDataType:
+            tableName: payments
+            columnName: url
+            newDataType: TEXT
