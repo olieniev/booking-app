@@ -78,4 +78,20 @@ public class CustomGlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(),
             HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(PaymentAccessDeniedException.class)
+    public ResponseEntity<String> handlePaymentAccessDeniedExceptions(
+            PaymentAccessDeniedException ex
+    ) {
+        return new ResponseEntity<>(ex.getMessage(),
+            HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(StripeSessionException.class)
+    public ResponseEntity<String> handleStripeSessionExceptions(
+            StripeSessionException ex
+    ) {
+        return new ResponseEntity<>(ex.getMessage(),
+            HttpStatus.CONFLICT);
+    }
 }
