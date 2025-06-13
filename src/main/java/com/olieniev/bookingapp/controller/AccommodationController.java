@@ -61,7 +61,7 @@ public class AccommodationController {
             description = "Updates accommodation by given id and parameters")
     @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public AccommodationDto updateAccommodation(Authentication authentication,
-            @PathVariable Long id, @RequestBody UpdateAccommodationRequestDto requestDto
+            @PathVariable Long id, @RequestBody @Valid UpdateAccommodationRequestDto requestDto
     ) {
         return accommodationService.update((User) authentication.getPrincipal(), id, requestDto);
     }
