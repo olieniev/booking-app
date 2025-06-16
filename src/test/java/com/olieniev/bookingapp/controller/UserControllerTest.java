@@ -108,7 +108,7 @@ public class UserControllerTest {
                 "user20@email.com",
                 "usertwenty",
                 "usertwenty",
-                Role.ROLE_USER);
+                Role.ROLE_MANAGER);
         assertNotNull(actual);
         assertEquals(expected, actual);
     }

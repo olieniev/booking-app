@@ -54,7 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
             return paymentRepository.findByBookingUserId(id, pageable)
                 .map(paymentMapper::toDto);
         }
-        if (!id.equals(user.getId())) {
+        if (id != null && !id.equals(user.getId())) {
             throw new PaymentAccessDeniedException(
                 "You only have access to your own payments!"
             );

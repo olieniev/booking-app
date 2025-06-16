@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -187,5 +188,29 @@ public class AccommodationControllerTest {
         );
         assertEquals(3, actual.size());
         assertEquals(expected, actual);
+    }
+
+    @WithUserDetails("user20@email.com")
+    @Test
+    @DisplayName("""
+        Deleting an existing accommodation is successful
+            """)
+    @Sql(scripts = {
+        "classpath:database/users/delete-from-users.sql",
+        "classpath:database/users/insert-three-users.sql",
+        "classpath:database/accommodations/insert-three-accommodations.sql",
+        "classpath:database/accommodations/insert-amenities-for-three-accommodations.sql"
+    })
+    @Sql(scripts = {
+        "classpath:database/accommodations/delete-from-accommodations-amenities.sql",
+        "classpath:database/accommodations/delete-from-accommodations.sql",
+        "classpath:database/users/delete-from-users.sql"
+    }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void deleteAccommodation_ExistsInDb_successful() throws Exception {
+        mockMvc.perform(
+                delete("/accommodations/{id}", 21L)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+                .andExpect(status().isNoContent());
     }
 }
