@@ -96,9 +96,8 @@ public class BookingController {
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBookingById(
-            Authentication authentication,
             @PathVariable Long id
     ) {
-        bookingService.deleteByBookingId((User) authentication.getPrincipal(), id);
+        bookingService.deleteByBookingId(id);
     }
 }

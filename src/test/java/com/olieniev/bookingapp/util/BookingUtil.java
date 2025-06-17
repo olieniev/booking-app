@@ -34,6 +34,22 @@ public class BookingUtil {
         );
     }
 
+    public static Booking getBooking() {
+        Booking booking = new Booking();
+        booking.setId(1L);
+        booking.setCheckInDate(LocalDate.of(2025, Month.JUNE, 20));
+        booking.setCheckOutDate(LocalDate.of(2025, Month.JUNE, 30));
+        return booking;
+    }
+
+    public static List<Booking> getListOfBookings() {
+        Booking booking = new Booking();
+        booking.setId(1L);
+        booking.setCheckInDate(LocalDate.of(2025, Month.JUNE, 20));
+        booking.setCheckOutDate(LocalDate.of(2025, Month.JUNE, 30));
+        return List.of(booking);
+    }
+
     public static List<BookingDto> getBookingsById() {
         return List.of(new BookingDto(
             12L,
@@ -68,6 +84,15 @@ public class BookingUtil {
             ),
             Booking.Status.CANCELED
         );
+    }
+
+    public static Booking getBookingForDetailedDto() {
+        Booking booking = new Booking();
+        booking.setId(13L);
+        booking.setCheckInDate(LocalDate.of(2025, Month.OCTOBER, 2));
+        booking.setCheckOutDate(LocalDate.of(2025, Month.OCTOBER, 8));
+        booking.setStatus(Booking.Status.CANCELED);
+        return booking;
     }
 
     public static BookingDto getUpdatedBooking() {
