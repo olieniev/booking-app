@@ -17,7 +17,7 @@ import java.util.Set;
 public class BookingUtil {
     public static CreateBookingRequestDto createBookingRequestDto() {
         return new CreateBookingRequestDto(
-            LocalDate.of(2025, Month.JUNE, 20),
+            LocalDate.of(2025, Month.JUNE, 23),
             LocalDate.of(2025, Month.JUNE, 30),
             10L
         );
@@ -26,7 +26,7 @@ public class BookingUtil {
     public static BookingDto createBookingDto() {
         return new BookingDto(
             1L,
-            LocalDate.of(2025, Month.JUNE, 20),
+            LocalDate.of(2025, Month.JUNE, 23),
             LocalDate.of(2025, Month.JUNE, 30),
             30L,
             10L,
@@ -37,7 +37,7 @@ public class BookingUtil {
     public static Booking getBooking() {
         Booking booking = new Booking();
         booking.setId(1L);
-        booking.setCheckInDate(LocalDate.of(2025, Month.JUNE, 20));
+        booking.setCheckInDate(LocalDate.of(2025, Month.JUNE, 23));
         booking.setCheckOutDate(LocalDate.of(2025, Month.JUNE, 30));
         return booking;
     }
@@ -45,7 +45,7 @@ public class BookingUtil {
     public static List<Booking> getListOfBookings() {
         Booking booking = new Booking();
         booking.setId(1L);
-        booking.setCheckInDate(LocalDate.of(2025, Month.JUNE, 20));
+        booking.setCheckInDate(LocalDate.of(2025, Month.JUNE, 23));
         booking.setCheckOutDate(LocalDate.of(2025, Month.JUNE, 30));
         return List.of(booking);
     }

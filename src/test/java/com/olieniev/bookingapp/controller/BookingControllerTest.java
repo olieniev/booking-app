@@ -85,7 +85,7 @@ public class BookingControllerTest {
                     .content(jsonRequest)
                     .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
         BookingDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), BookingDto.class

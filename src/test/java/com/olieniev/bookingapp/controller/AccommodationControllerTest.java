@@ -72,7 +72,7 @@ public class AccommodationControllerTest {
                     .content(jsonRequest)
                     .contentType(MediaType.APPLICATION_JSON)
             )
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
         AccommodationDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), AccommodationDto.class

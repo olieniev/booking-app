@@ -13,6 +13,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -48,6 +50,7 @@ public class PaymentController {
     @PreAuthorize("hasAnyRole('MANAGER','USER')")
     @Operation(summary = "Initiate payment session",
             description = "Initiates payment session for desired booking")
+    @ResponseStatus(HttpStatus.CREATED)
     public CreatePaymentResponseDto makePayment(
             @RequestBody @Valid CreatePaymentRequestDto requestDto,
             Authentication authentication,

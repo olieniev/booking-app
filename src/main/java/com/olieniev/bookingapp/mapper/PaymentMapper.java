@@ -6,7 +6,6 @@ import com.olieniev.bookingapp.model.Payment;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring", config = MapperConfig.class)
-
 public interface PaymentMapper {
     PaymentDto toDto(Payment payment);
 }

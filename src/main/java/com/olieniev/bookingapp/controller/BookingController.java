@@ -39,6 +39,7 @@ public class BookingController {
     @Operation(summary = "Create a booking method",
             description = "Creates a booking with given parameters")
     @PreAuthorize("hasAnyRole('MANAGER','USER')")
+    @ResponseStatus(HttpStatus.CREATED)
     public BookingDto createBooking(Authentication authentication,
                                     @RequestBody @Valid CreateBookingRequestDto requestDto) {
         return bookingService.save((User) authentication.getPrincipal(), requestDto);
@@ -82,7 +83,7 @@ public class BookingController {
     public BookingDto updateBookingById(
             Authentication authentication,
             @PathVariable Long id,
-            @RequestBody UpdateBookingRequestDto requestDto
+            @RequestBody @Valid UpdateBookingRequestDto requestDto
     ) {
         return bookingService.updateByBookingId(
             (User) authentication.getPrincipal(),

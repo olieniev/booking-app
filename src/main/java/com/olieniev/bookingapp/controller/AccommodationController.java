@@ -36,6 +36,7 @@ public class AccommodationController {
     @Operation(summary = "Create an accommodation method",
             description = "Creates an accommodation with given parameters")
     @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    @ResponseStatus(HttpStatus.CREATED)
     public AccommodationDto createAccommodation(Authentication authentication,
             @RequestBody @Valid CreateAccommodationRequestDto requestDto) {
         return accommodationService.save((User) authentication.getPrincipal(), requestDto);

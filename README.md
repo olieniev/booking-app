@@ -64,7 +64,11 @@ Let me guide you through the details.
     - Maven
     - MySQL
     - Docker
-- Clone the repository
+- Clone the repository:
+```
+https://github.com/olieniev/booking-app.git
+cd booking-app
+```
 - Create an env file (a template is provided, see "env.template" file)
 - Add your Telegram API token (see BotFather in TG documentation) and chat id to application.properties file.
 - Add Stripe API token, refer to Stripe documentation.

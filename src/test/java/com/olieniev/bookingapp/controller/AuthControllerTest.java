@@ -58,7 +58,7 @@ public class AuthControllerTest {
                     .content(jsonRequest)
                     .contentType(MediaType.APPLICATION_JSON)
             )
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
         UserDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), UserDto.class
